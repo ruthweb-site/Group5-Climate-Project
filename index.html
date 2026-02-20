@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarbonTracker | ThermoCity Simulator</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="brand"><span class="logo">🌍</span><span class="site-name">ThermoCity</span></div>
+            <div class="nav-links">
+                <a href="#" class="nav-link active">Simulation</a>
+                <a href="#about" class="nav-link">About</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="simulation-container">
+        <section class="sim-header">
+            <h1>🌡️ Carbon Emission & Temperature Simulator</h1>
+            <p>Adjust emission sources and carbon sinks to see how your actions affect global temperature by 2100.
+                Try clicking <strong>"Max All Positive Actions"</strong> to see the best-case scenario!</p>
+        </section>
+
+        <div class="main-content">
+            <!-- 3 Metric Cards -->
+            <div class="metrics-grid">
+                <div class="metric-card" id="emissionCard">
+                    <div class="metric-label">Total Emissions</div>
+                    <div class="metric-value" id="grossEmissions">39.2</div>
+                    <div class="metric-unit">Gt CO₂/year</div>
+                    <div class="metric-status bad" id="emissionStatus">Baseline level</div>
+                </div>
+                <div class="metric-card" id="removalCard">
+                    <div class="metric-label">Carbon Removal</div>
+                    <div class="metric-value" id="totalSinks">5.7</div>
+                    <div class="metric-unit">Gt CO₂/year removed</div>
+                    <div class="metric-status good" id="sinkStatus">Natural + Tech</div>
+                </div>
+                <div class="metric-card" id="tempCard">
+                    <div class="metric-label">🌡️ Temperature by 2100</div>
+                    <div class="metric-value" id="tempChange">+2.8</div>
+                    <div class="metric-unit">°C vs pre-industrial</div>
+                    <div class="metric-status bad" id="tempStatus">Above safe limit</div>
+                </div>
+            </div>
+
+            <!-- Chart + Controls -->
+            <div class="grid-layout">
+                <div class="panel">
+                    <div class="panel-title"><i class="fas fa-chart-line"></i> Temperature Projection (2024–2100)</div>
+                    <div class="chart-wrapper">
+                        <canvas id="tempChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="panel controls-panel">
+                    <!-- AI Insights Panel -->
+                    <div id="ai-panel" class="panel"
+                        style="margin-bottom: 2rem; border: 2px solid #10b981; background: #f0fdf4;">
+                        <div class="panel-title" style="color: #059669;">
+                            <i class="fas fa-robot"></i> AI Climate Assistant
+                        </div>
+                        <div id="ai-status" style="font-size: 0.85rem; margin-bottom: 1rem; color: #065f46;">
+                            Analyzing simulation gap...
+                        </div>
+                        <div id="ai-suggestions" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <!-- AI Suggestions will be injected here -->
+                        </div>
+                        <button class="btn-action" id="getAiAdviceBtn" style="background: #059669; margin-top: 1rem;">
+                            💡 Get AI-Optimized Policy
+                        </button>
+                    </div>
+
+                    <div class="section-label sources"><i class="fas fa-fire"></i> Emission Sources</div>
+
+                    <div class="sector-control" data-sector="energy">
+                        <div class="sector-header"><span class="sector-name">⚡ Energy & Heat</span><span
+                                class="sector-emission source" id="energy-emission">15.8 Gt</span></div>
+                        <div class="slider-control"><input type="range" id="energy-slider" min="0" max="150"
+                                value="100"></div>
+                        <div class="sector-detail">Coal, gas, oil — <span id="energy-pct">100%</span></div>
+                    </div>
+                    <div class="sector-control" data-sector="transport">
+                        <div class="sector-header"><span class="sector-name">🚗 Transport</span><span
+                                class="sector-emission source" id="transport-emission">7.3 Gt</span></div>
+                        <div class="slider-control"><input type="range" id="transport-slider" min="0" max="150"
+                                value="100"></div>
+                        <div class="sector-detail">Cars, trucks, aviation — <span id="transport-pct">100%</span></div>
+                    </div>
+                    <div class="sector-control" data-sector="industry">
+                        <div class="sector-header"><span class="sector-name">🏭 Industry</span><span
+                                class="sector-emission source" id="industry-emission">5.9 Gt</span></div>
+                        <div class="slider-control"><input type="range" id="industry-slider" min="0" max="150"
+                                value="100"></div>
+                        <div class="sector-detail">Cement, steel, chemicals — <span id="industry-pct">100%</span></div>
+                    </div>
+                    <div class="sector-control" data-sector="buildings">
+                        <div class="sector-header"><span class="sector-name">🏢 Buildings</span><span
+                                class="sector-emission source" id="buildings-emission">2.9 Gt</span></div>
+                        <div class="slider-control"><input type="range" id="buildings-slider" min="0" max="150"
+                                value="100"></div>
+                        <div class="sector-detail">Heating, cooling — <span id="buildings-pct">100%</span></div>
+                    </div>
+                    <div class="sector-control" data-sector="agriculture">
+                        <div class="sector-header"><span class="sector-name">🌾 Agriculture</span><span
+                                class="sector-emission source" id="agriculture-emission">5.7 Gt</span></div>
+                        <div class="slider-control"><input type="range" id="agriculture-slider" min="0" max="150"
+                                value="100"></div>
+                        <div class="sector-detail">Livestock, deforestation — <span id="agriculture-pct">100%</span>
+                        </div>
+                    </div>
+                    <div class="sector-control" data-sector="waste">
+                        <div class="sector-header"><span class="sector-name">🗑️ Waste</span><span
+                                class="sector-emission source" id="waste-emission">1.6 Gt</span></div>
+                        <div class="slider-control"><input type="range" id="waste-slider" min="0" max="150" value="100">
+                        </div>
+                        <div class="sector-detail">Landfills, incineration — <span id="waste-pct">100%</span></div>
+                    </div>
+
+                    <div class="section-label sinks"><i class="fas fa-leaf"></i> Carbon Removal</div>
+
+                    <div class="sector-control sink">
+                        <div class="sector-header"><span class="sector-name">🌳 Forests & Land</span><span
+                                class="sector-emission sink" id="forest-removal">−3.1 Gt</span></div>
+                        <div class="slider-control"><input type="range" id="forest-slider" min="0" max="700"
+                                value="100"></div>
+                        <div class="sector-detail">Reforestation — <span id="forest-pct">100%</span></div>
+                    </div>
+                    <div class="sector-control sink">
+                        <div class="sector-header"><span class="sector-name">🌊 Ocean Absorption</span><span
+                                class="sector-emission sink" id="ocean-removal">−2.5 Gt</span></div>
+                        <div class="slider-control"><input type="range" id="ocean-slider" min="0" max="700" value="100">
+                        </div>
+                        <div class="sector-detail">Natural + enhanced — <span id="ocean-pct">100%</span></div>
+                    </div>
+                    <div class="sector-control sink">
+                        <div class="sector-header"><span class="sector-name">🏭 Carbon Capture (CCS)</span><span
+                                class="sector-emission sink" id="ccs-removal">−0.04 Gt</span></div>
+                        <div class="slider-control"><input type="range" id="ccs-slider" min="0" max="2500" value="100">
+                        </div>
+                        <div class="sector-detail">Industrial capture — <span id="ccs-pct">100%</span></div>
+                    </div>
+                    <div class="sector-control sink">
+                        <div class="sector-header"><span class="sector-name">🔬 Direct Air Capture</span><span
+                                class="sector-emission sink" id="dac-removal">−0.01 Gt</span></div>
+                        <div class="slider-control"><input type="range" id="dac-slider" min="0" max="2500" value="100">
+                        </div>
+                        <div class="sector-detail">Tech CO₂ removal — <span id="dac-pct">100%</span></div>
+                    </div>
+
+                    <button class="btn-action net-zero-btn" id="maxGreenBtn"><i class="fas fa-leaf"></i> Max All
+                        Positive Actions</button>
+                    <button class="btn-action" id="resetBtn"><i class="fas fa-undo"></i> Reset to Baseline</button>
+                    <button class="btn-action secondary" id="logActivityBtn">✍️ Log Real-World Activity</button>
+                </div>
+            </div>
+
+            <!-- Real-World Logger (Hidden by default) -->
+            <div id="logger-modal" class="modal" style="display: none;">
+                <div class="modal-content card">
+                    <h3 class="section-title">✍️ Log Activity Data</h3>
+                    <form id="activity-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="category">Category</label>
+                                <select id="category" required>
+                                    <option value="energy">Energy</option>
+                                    <option value="transportation">Transportation</option>
+                                    <option value="waste">Waste</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="type">Activity Type</label>
+                                <select id="type" required></select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="value" id="value-label">Usage Amount</label>
+                            <input type="number" id="value" step="0.01" required placeholder="Enter numerical value">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Add to Calculator</button>
+                            <button type="button" id="closeLogger" class="btn btn-secondary">Close</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer id="about" style="background:#0f172a;color:white;padding:3rem 2rem 2rem">
+        <div style="max-width:1200px;margin:0 auto">
+            <div
+                style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:2rem;margin-bottom:3rem">
+                <div>
+                    <h4 style="font-size:1.25rem;font-weight:600;margin-bottom:1.5rem">Data Sources</h4>
+                    <p style="color:#94a3b8;margin:0">IPCC AR6 WGIII (2022)</p>
+                    <p style="color:#94a3b8;margin:0">Global Carbon Project</p>
+                    <p style="color:#94a3b8;margin:0">Long-term calculation based on TCRE model.</p>
+                </div>
+                <div>
+                    <h4 style="font-size:1.25rem;font-weight:600;margin-bottom:1.5rem">Mission</h4>
+                    <p style="color:#94a3b8;margin:0">Educating users on the impact of sectoral emissions and the
+                        necessity of both reduction and removal for net-zero goals.</p>
+                </div>
+            </div>
+            <div style="border-top:1px solid #334155;padding-top:2rem;text-align:center">
+                <p style="color:#64748b;margin:0;font-size:0.875rem">© 2024 ThermoCity | Powered by FastAPI</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
